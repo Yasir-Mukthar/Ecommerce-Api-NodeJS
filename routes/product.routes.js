@@ -3,8 +3,34 @@ import { Product } from "../models/product.model.js";
 import { Category } from "../models/category.model.js";
 import mongoose from "mongoose"; // Import mongoose package
 import authJwt from "../helpers/jwt.js";
+import multer from "multer";
 
 const router = Router();
+const fileType={
+  'image/png':'png',
+  'image/jpeg':'jpg',
+  'image/jpg':'jpg'
+}
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const isValid = fileType[file.mimetype];
+    let uploadError = new Error('Invalid image type');
+    
+    if(isValid){
+      uploadError=null;
+    }
+    cb(uploadError, 'public/uploads')
+  },
+  filename: function (req, file, cb) {
+    const extension = fileType[file.mimetype];
+    if(!extension) return cb(new Error('Invalid file type'));
+   const fileExt = file.originalname.split(" ").join('-');
+
+    cb(null, `${fileExt}-${Date.now()}.${extension}`)
+  }
+})
+
+const upload = multer({ storage: storage })
 
 router.get(`/products`, async (req, res) => {
   const product = await Product.find().populate("category");
@@ -32,13 +58,13 @@ router.get(`/products/:id`, async (req, res) => {
 
 //create new product
 
-router.post(`/products`,authJwt(), async (req, res) => {
+router.post(`/products`,authJwt(), upload.single("image"), async (req, res) => {
   try {
     const {
       name,
       description,
       richDescription,
-      image,
+      
       brand,
       price,
       category,
@@ -47,6 +73,10 @@ router.post(`/products`,authJwt(), async (req, res) => {
       numReviews,
       isFeatured,
     } = req.body;
+    const image = req.file.filename;
+    console.log(image);
+    const fullImagePath = req.protocol + "://" + req.get("host") + "/public/uploads/" + image;
+    console.log("full ",fullImagePath)
 
     const categoryExist = await Category.findById(category);
     if (!categoryExist) {
@@ -61,7 +91,7 @@ router.post(`/products`,authJwt(), async (req, res) => {
       name,
       description,
       richDescription,
-      image,
+      image: fullImagePath,
       brand,
       price,
       category,
