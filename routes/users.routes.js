@@ -20,7 +20,7 @@ router.get('/users',authJwt(),async (req, res) =>{
 });
 
 //post a user
-router.post("/users",authJwt(),async(req, res)=>{
+router.post("/users",async(req, res)=>{
     try{
         const {name, email, passwordHash, phone, isAdmin, street, apartment, city, zip, country} = req.body;
         const user = new User({
@@ -65,7 +65,7 @@ router.get("/users/:id",authJwt(),async(req,res)=>{
     }
 })
 
-
+//login
 router.post("/login", async(req, res)=>{
     const user= await User.findOne({email:req.body.email});
     const secret = process.env.SECRET;

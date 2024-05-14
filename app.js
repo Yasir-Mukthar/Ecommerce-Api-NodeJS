@@ -36,8 +36,6 @@ app.use(`/api/v1`, productRouter);
 app.use(`/api/v1`, userRouter);
 app.use(authJwt());
 
-
-
 app.use(`/api/v1`, orderRouter);
 app.use(`/api/v1`,isAdmin, categoryRouter);
 
@@ -58,5 +56,5 @@ mongoose.connect(process.env.CONNECTION_STRING)
 
 // Server Listener
 app.listen(process.env.API_PORT, () => {
-    console.log(`Server is running on port ${process.env.API_PORT || 3000}`);
+    console.log(`Server is running on port ${process.env.API_PORT || 4000}`);
     });
